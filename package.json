@@ -1,0 +1,44 @@
+{
+  "name": "@naturalcycles/redis-lib",
+  "scripts": {},
+  "dependencies": {
+    "@naturalcycles/db-lib": "^1.8.1",
+    "@naturalcycles/js-lib": "^8.5.1",
+    "@naturalcycles/nodejs-lib": "^6.11.1",
+    "@types/ioredis": "^4.0.15",
+    "chalk": "^2.4.2",
+    "ioredis": "^4.14.0",
+    "rxjs": "^6.5.2"
+  },
+  "devDependencies": {
+    "@naturalcycles/db-dev-lib": "^1.1.5",
+    "@naturalcycles/dev-lib": "^7.16.2",
+    "@types/node": "^12.7.2",
+    "dotenv": "^8.1.0",
+    "jest": "^24.9.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/test",
+    "!src/**/*.test.ts",
+    "!src/**/__snapshots__",
+    "!src/**/__exclude"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NaturalCycles/redis-lib"
+  },
+  "engines": {
+    "node": ">=10.13"
+  },
+  "version": "0.0.0",
+  "description": "Redis implementation of CommonDB interface",
+  "author": "Natural Cycles Team",
+  "license": "MIT"
+}
