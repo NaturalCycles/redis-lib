@@ -466,9 +466,9 @@
     rimraf "^2.5.2"
 
 "@naturalcycles/db-dev-lib@^1.1.5":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@naturalcycles/db-dev-lib/-/db-dev-lib-1.1.8.tgz#ab4bae6be92a889a56e72853cfd97e4cef1efd88"
-  integrity sha512-jmirF4GJN+boc2Be3YIDPY4aHmVn8mXrvE0ePDNUG5dXmZZexwD3IPOYpBWAgu5oIxG2afMVIw+CXpbYlTY25A==
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/@naturalcycles/db-dev-lib/-/db-dev-lib-1.1.9.tgz#72e451bb4fca786a0e5eee7a11a5b97f62aa2c7b"
+  integrity sha512-D8U/75yD0maNZh4kRfbQrk+fSPQZnGfmXzVua64KmiAts6Qf+gfHNs8j42HsCCwB6tdfHYfztXszfbJziumhZg==
   dependencies:
     "@naturalcycles/db-lib" "^1.2.1"
     "@naturalcycles/test-lib" "^1.0.3"
@@ -476,9 +476,9 @@
     type-fest "^0.7.1"
 
 "@naturalcycles/db-lib@^1.2.1", "@naturalcycles/db-lib@^1.8.1":
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/@naturalcycles/db-lib/-/db-lib-1.9.1.tgz#d0ade4ce8fdf3e265b9d49c5196b36501cfe2622"
-  integrity sha512-IaWcz8uMJ95tzTbRo3N/+zfam8X+2Yp8vAjOxekRbl6y1cFOx/KhKXmCkls5x9IS8SA9J9YzUvWjGNXc8x4odg==
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@naturalcycles/db-lib/-/db-lib-1.10.2.tgz#dbc23d4fe3d86390ca208908923f6c4a804c6ab3"
+  integrity sha512-w1PcvWd4dVf+JaqVYGYlQFuxmPJyrAx45sjECNO1C95ekJa1f84Eohucq2aPCxsPa7IMHT77mNMHVTPaP0ZD5A==
   dependencies:
     "@naturalcycles/js-lib" "^8.2.1"
     "@naturalcycles/nodejs-lib" "^6.5.0"
@@ -531,9 +531,9 @@
     yargs "^14.0.0"
 
 "@naturalcycles/js-lib@^8.0.0", "@naturalcycles/js-lib@^8.2.1", "@naturalcycles/js-lib@^8.4.0", "@naturalcycles/js-lib@^8.5.1":
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/@naturalcycles/js-lib/-/js-lib-8.6.0.tgz#176675d21bcb6466f826cf60a9d3f8aebcbe91c7"
-  integrity sha512-gHVVKh0Vn0mBfVXCEefbAt/zOKDG130kSU2Ii2DpIChqOd8WZwMphckQulD4I8r4IY5gMB/8ITeSC69738qsbg==
+  version "8.6.1"
+  resolved "https://registry.yarnpkg.com/@naturalcycles/js-lib/-/js-lib-8.6.1.tgz#a9576f39648ee6e8615ae11ac6a8774c729d170f"
+  integrity sha512-NHYkPt0GBuE71JBjDu2IQKzBLLWGqUjpZlqi9IbJV3O93j10wVZb6qSPb0OMKKo94UsN4jNmt3zTOAeIlbPO5A==
   dependencies:
     type-fest "^0.7.1"
 
@@ -560,9 +560,9 @@
     timekeeper "^2.2.0"
 
 "@naturalcycles/time-lib@^1.0.0", "@naturalcycles/time-lib@^1.4.3":
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/@naturalcycles/time-lib/-/time-lib-1.4.3.tgz#ad3e63f4442ba55eee04f315243b72036e42e84f"
-  integrity sha512-eWRQQqREwEkFa9i1/VBkkL0QoFjPgRz2AfITFvFTboAb2Zmtm13AfEAFpuMy4HUh3HNO+3kX5M5hw6FvtKXqzw==
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@naturalcycles/time-lib/-/time-lib-1.5.0.tgz#3b80ff2310b8efc3279ad6aad3dc1134dcf15a6c"
+  integrity sha512-oPX+etA74zP2ffm5ojv1uAI8LhCFz7c5JtY7SNR4DoXaYO77+RyPq3Z9ef6tXawMySziCX9Sm2/evGqT7K2tsA==
   dependencies:
     dayjs "^1.8.14"
 
@@ -3545,9 +3545,9 @@ minimist@~0.0.1:
   integrity sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
 
 minipass@^2.2.1, minipass@^2.3.5:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.3.5.tgz#cacebe492022497f656b0f0f51e2682a9ed2d848"
-  integrity sha512-Gi1W4k059gyRbyVUZQ4mEqLm0YIUiGYfvxhF6SIlk3ui1WVxMTGfGdQ2SInh3PDrRTVvPKgULkpJtT4RH10+VA==
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.4.0.tgz#38f0af94f42fb6f34d3d7d82a90e2c99cd3ff485"
+  integrity sha512-6PmOuSP4NnZXzs2z6rbwzLJu/c5gdzYg1mRI/WIYdx45iiX7T+a4esOzavD6V/KmBzAaopFSTZPZcUx73bqKWA==
   dependencies:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"

@@ -31,3 +31,7 @@
 
     redis-cli ping
     redis-cli flushall
+
+Location and size of local DB:
+
+    ls -l /usr/local/var/db/redis/dump.rdb

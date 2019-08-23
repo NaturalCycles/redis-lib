@@ -25,6 +25,7 @@ let redis: RedisDB
 beforeEach(async () => {
   redis = new RedisDB({
     runQueries: true,
+    namespacePrefix: 'test_',
   })
   await redis.resetCache()
 })
@@ -34,11 +35,6 @@ afterEach(async () => {
 })
 
 test('test1', async () => {
-  // console.log(items)
-
-  // const redis = new RedisDB()
-  // await redis.resetCache()
-
   let loadedItems = await redis.getByIds(TEST_TABLE, items.map(i => i.id))
   expect(loadedItems).toEqual([])
 

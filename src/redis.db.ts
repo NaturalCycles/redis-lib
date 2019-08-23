@@ -6,7 +6,7 @@ import {
   DBQuery,
 } from '@naturalcycles/db-lib'
 import { queryInMemory } from '@naturalcycles/db-lib/dist/inMemory.db'
-import { _flatten, by, pMap } from '@naturalcycles/js-lib'
+import { _flatten } from '@naturalcycles/js-lib'
 import { Debug, streamToObservable } from '@naturalcycles/nodejs-lib'
 import c from 'chalk'
 import { RedisOptions } from 'ioredis'
@@ -25,24 +25,40 @@ export interface RedisDBCfg {
    * @default false
    */
   runQueries?: boolean
+
+  /**
+   * If set - all keys will be prefixed by it.
+   * So the key will look like:
+   * ${namespacePrefix}${table}_${id}
+   */
+  namespacePrefix?: string
 }
 
 /**
  * streamQuery doesn't support limit and order - it always returns unlimited unsorted results.
  */
 export class RedisDB implements CommonDB {
-  constructor (public cfg: RedisDBCfg = {}) {
+  constructor (cfg: RedisDBCfg = {}) {
+    this.cfg = {
+      runQueries: false,
+      namespacePrefix: '',
+      ...cfg,
+      redisOptions: {
+        showFriendlyErrorStack: true,
+        lazyConnect: true,
+        ...cfg.redisOptions,
+      },
+    }
+
     this.redis = this.create()
   }
+
+  public cfg!: Required<RedisDBCfg>
 
   redis!: Redis.Redis
 
   protected create (): Redis.Redis {
-    const redis = new Redis({
-      showFriendlyErrorStack: true,
-      lazyConnect: true,
-      ...this.cfg.redisOptions,
-    })
+    const redis = new Redis(this.cfg.redisOptions)
 
     const redisEvents = ['connect', 'close', 'reconnecting', 'end']
     redisEvents.forEach(e => redis.on(e, () => log(`event:`, c.bold(e))))
@@ -61,18 +77,23 @@ export class RedisDB implements CommonDB {
     log(`quit:`, await this.redis.quit())
   }
 
-  async resetCache (): Promise<void> {
-    log('flushall:', await this.redis.flushall())
+  async resetCache (table?: string): Promise<void> {
+    const pattern = `${this.cfg.namespacePrefix}${table || ''}*`
+    const keys = await this.redis.keys(pattern)
+    if (keys.length) {
+      await this.redis.del(...keys)
+    }
+    log(`resetCache deleted ${keys.length} keys under ${pattern}`)
   }
 
   key (table: string, id: string): string {
-    return [table, id].join('_')
+    return this.cfg.namespacePrefix + [table, id].join('_')
   }
 
   parseKey (table: string, key: string): { table: string; id: string } {
     return {
       table,
-      id: key.substr(table.length + 1),
+      id: key.substr(this.cfg.namespacePrefix.length + table.length + 1),
     }
   }
 
@@ -108,14 +129,9 @@ export class RedisDB implements CommonDB {
     return dbms.filter(Boolean).map(dbm => this.deserialize<DBM>(dbm))
   }
 
-  async deleteByIds (table: string, ids: string[], opts?: CommonDBOptions): Promise<string[]> {
-    if (!ids.length) return []
-    const deletedIds = await pMap(ids, async id => {
-      const deleted = await this.redis.del(this.key(table, id))
-      return deleted === 1 ? id : undefined
-    })
-
-    return deletedIds.filter(Boolean) as string[]
+  async deleteByIds (table: string, ids: string[], opts?: CommonDBOptions): Promise<number> {
+    if (!ids.length) return 0
+    return this.redis.del(...ids.map(id => this.key(table, id)))
   }
 
   streamQuery<DBM extends BaseDBEntity> (q: DBQuery<DBM>, opts?: CommonDBOptions): Observable<DBM> {
@@ -123,13 +139,13 @@ export class RedisDB implements CommonDB {
 
     return streamToObservable<string[]>(
       this.redis.scanStream({
-        match: `${q.table}_*`,
+        match: `${this.cfg.namespacePrefix}${q.table}_*`,
       }),
     ).pipe(
       mergeMap(async keys => {
         const ids = keys.map(k => this.parseKey(q.table, k).id)
         const dbms = await this.getByIds<DBM>(q.table, ids)
-        return queryInMemory(q, by(dbms, dbm => dbm.id))
+        return queryInMemory(q, dbms)
       }),
       mergeMap(dbms => dbms),
     )
@@ -142,7 +158,7 @@ export class RedisDB implements CommonDB {
     const dbms = await this.streamQuery(q, opts)
       .pipe(toArray())
       .toPromise()
-    return queryInMemory(q, by(dbms, dbm => dbm.id))
+    return queryInMemory(q, dbms)
   }
 
   async runQueryCount<DBM extends BaseDBEntity> (
@@ -156,7 +172,7 @@ export class RedisDB implements CommonDB {
   async deleteByQuery<DBM extends BaseDBEntity> (
     q: DBQuery<DBM>,
     opts?: CommonDBOptions,
-  ): Promise<string[]> {
+  ): Promise<number> {
     const dbms = await this.runQuery(q, opts)
     return this.deleteByIds(q.table, dbms.map(dbm => dbm.id), opts)
   }
