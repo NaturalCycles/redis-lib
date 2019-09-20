@@ -11,8 +11,7 @@
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
-    "@naturalcycles/db-dev-lib": "^1.1.5",
-    "@naturalcycles/dev-lib": "^7.16.2",
+    "@naturalcycles/dev-lib": "^8.1.0",
     "@types/node": "^12.7.2",
     "dotenv": "^8.1.0",
     "jest": "^24.9.0"

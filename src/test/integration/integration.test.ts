@@ -1,14 +1,5 @@
-import {
-  TEST_TABLE,
-  testDao,
-  testDB,
-  testItems,
-  testItemUnsavedSchema,
-} from '@naturalcycles/db-dev-lib'
-import { CommonDao, DBQuery } from '@naturalcycles/db-lib'
-import { _sortBy } from '@naturalcycles/js-lib'
+import { runCommonDaoTest, runCommonDBTest } from '@naturalcycles/db-lib'
 import { Debug } from '@naturalcycles/nodejs-lib'
-import { toArray } from 'rxjs/operators'
 import { RedisDB } from '../../redis.db'
 
 // Start server before running these tests:
@@ -18,54 +9,24 @@ import { RedisDB } from '../../redis.db'
 Debug.enable('nc:*')
 jest.setTimeout(60000)
 
-const items = testItems(5)
-
-let redis: RedisDB
+let redisDB: RedisDB
 
 beforeEach(async () => {
-  redis = new RedisDB({
+  redisDB = new RedisDB({
     runQueries: true,
     namespacePrefix: 'test_',
   })
-  await redis.resetCache()
+  await redisDB.resetCache()
 })
 
 afterEach(async () => {
-  await redis.quit()
+  await redisDB.quit()
 })
 
-test('test1', async () => {
-  let loadedItems = await redis.getByIds(TEST_TABLE, items.map(i => i.id))
-  expect(loadedItems).toEqual([])
-
-  await redis.saveBatch(TEST_TABLE, items)
-  // await redis.deleteByIds(TEST_TABLE, ['asdasd', items[0].id])
-  loadedItems = await redis.getByIds(TEST_TABLE, items.map(i => i.id))
-  // console.log(loadedItems)
-  expect(loadedItems).toEqual(items)
-
-  loadedItems = await redis
-    .streamQuery(new DBQuery(TEST_TABLE))
-    .pipe(toArray())
-    .toPromise()
-  expect(_sortBy(loadedItems, 'id')).toEqual(items)
-  // console.log(loadedItems)
-  // await pDelay(5000)
-
-  // await redis.quit()
+test('runCommonDBTest', async () => {
+  await runCommonDBTest(redisDB)
 })
 
-test('testDB', async () => {
-  // await redis.resetCache()
-  await testDB(redis, DBQuery)
-})
-
-test('testDao', async () => {
-  const testItemDao = new CommonDao({
-    table: TEST_TABLE,
-    db: redis,
-    bmUnsavedSchema: testItemUnsavedSchema,
-    dbmUnsavedSchema: testItemUnsavedSchema,
-  })
-  await testDao(testItemDao, DBQuery)
+test('runCommonDaoTest', async () => {
+  await runCommonDaoTest(redisDB)
 })
