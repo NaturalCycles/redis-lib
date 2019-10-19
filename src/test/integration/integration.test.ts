@@ -9,24 +9,24 @@ import { RedisDB } from '../../redis.db'
 Debug.enable('nc:*')
 jest.setTimeout(60000)
 
-let redisDB: RedisDB
+const redisDB = new RedisDB({
+  runQueries: true,
+  namespacePrefix: 'test_',
+})
 
-beforeEach(async () => {
-  redisDB = new RedisDB({
-    runQueries: true,
-    namespacePrefix: 'test_',
-  })
+beforeAll(async () => {
   await redisDB.resetCache()
 })
 
-afterEach(async () => {
+afterAll(async () => {
   await redisDB.quit()
 })
 
-test('runCommonDBTest', async () => {
-  await runCommonDBTest(redisDB)
-})
+const opt = {
+  allowQueryUnsorted: true,
+  allowStreamQueryToBeUnsorted: true,
+}
 
-test('runCommonDaoTest', async () => {
-  await runCommonDaoTest(redisDB)
-})
+describe('runCommonDBTest', () => runCommonDBTest(redisDB, opt))
+
+describe('runCommonDaoTest', () => runCommonDaoTest(redisDB, opt))

@@ -8,12 +8,11 @@ import {
 } from '@naturalcycles/db-lib'
 import { queryInMemory } from '@naturalcycles/db-lib/dist/inMemory.db'
 import { _flatten } from '@naturalcycles/js-lib'
-import { Debug, streamToObservable } from '@naturalcycles/nodejs-lib'
+import { Debug, readableFrom, streamToArray } from '@naturalcycles/nodejs-lib'
 import c from 'chalk'
 import { RedisOptions } from 'ioredis'
 import * as Redis from 'ioredis'
-import { EMPTY, Observable } from 'rxjs'
-import { mergeMap, toArray } from 'rxjs/operators'
+import { Readable, Transform } from 'stream'
 
 const log = Debug('nc:redis-lib')
 
@@ -135,30 +134,34 @@ export class RedisDB implements CommonDB {
     return await this.redis.del(...ids.map(id => this.key(table, id)))
   }
 
-  streamQuery<DBM extends SavedDBEntity>(q: DBQuery<DBM>, opts?: CommonDBOptions): Observable<DBM> {
-    if (!this.cfg.runQueries) return EMPTY
+  streamQuery<DBM extends SavedDBEntity>(q: DBQuery<DBM>, opts?: CommonDBOptions): Readable {
+    if (!this.cfg.runQueries) return readableFrom([])
+    const _this = this
 
-    return streamToObservable<string[]>(
-      this.redis.scanStream({
+    return this.redis
+      .scanStream({
         match: `${this.cfg.namespacePrefix}${q.table}_*`,
-      }),
-    ).pipe(
-      mergeMap(async keys => {
-        const ids = keys.map(k => this.parseKey(q.table, k).id)
-        const dbms = await this.getByIds<DBM>(q.table, ids)
-        return queryInMemory(q, dbms)
-      }),
-      mergeMap(dbms => dbms),
-    )
+      })
+      .pipe(
+        new Transform({
+          objectMode: true,
+          async transform(keys: string[], _encoding, cb) {
+            const ids = keys.map(k => _this.parseKey(q.table, k).id)
+            const dbms = await _this.getByIds<DBM>(q.table, ids)
+            const items = queryInMemory(q, dbms)
+            // tslint:disable-next-line:no-invalid-this
+            items.forEach(item => this.push(item)) // push multiple items!
+            cb()
+          },
+        }),
+      )
   }
 
   async runQuery<DBM extends SavedDBEntity>(
     q: DBQuery<DBM>,
     opts?: CommonDBOptions,
   ): Promise<RunQueryResult<DBM>> {
-    const dbms = await this.streamQuery(q, opts)
-      .pipe(toArray())
-      .toPromise()
+    const dbms = await streamToArray<DBM>(this.streamQuery(q, opts))
     return { records: queryInMemory(q, dbms) }
   }
 

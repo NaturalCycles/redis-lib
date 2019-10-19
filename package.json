@@ -2,19 +2,21 @@
   "name": "@naturalcycles/redis-lib",
   "scripts": {},
   "dependencies": {
-    "@naturalcycles/db-lib": "^1.8.1",
+    "@naturalcycles/db-lib": "^2.0.2",
     "@naturalcycles/js-lib": "^8.5.1",
     "@naturalcycles/nodejs-lib": "^6.11.1",
     "@types/ioredis": "^4.0.15",
     "chalk": "^2.4.2",
-    "ioredis": "^4.14.0",
-    "rxjs": "^6.5.2"
+    "ioredis": "^4.14.0"
   },
   "devDependencies": {
     "@naturalcycles/dev-lib": "^8.1.0",
     "@types/node": "^12.7.2",
     "dotenv": "^8.1.0",
     "jest": "^24.9.0"
+  },
+  "resolutions": {
+    "@types/hapi__joi": "15.0.4"
   },
   "files": [
     "dist",
