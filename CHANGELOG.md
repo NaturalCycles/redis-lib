@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/NaturalCycles/redis-lib/compare/v1.1.1...v2.0.0) (2019-10-19)
+
+
+### Features
+
+* impl CommonDB 2.0 ([4830225](https://github.com/NaturalCycles/redis-lib/commit/4830225))
+
+
+### BREAKING CHANGES
+
+* ^^^
+
 ## [1.1.1](https://github.com/NaturalCycles/redis-lib/compare/v1.1.0...v1.1.1) (2019-09-20)
 
 
