@@ -1,3 +1,2 @@
-import { RedisDB, RedisDBCfg } from './redis.db'
-
-export { RedisDBCfg, RedisDB }
+export * from './redisClient'
+export * from './redisKeyValueDB'
