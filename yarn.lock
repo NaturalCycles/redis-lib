@@ -862,17 +862,17 @@
     yargs "^17.0.0"
 
 "@naturalcycles/js-lib@^14.0.0", "@naturalcycles/js-lib@^14.116.0", "@naturalcycles/js-lib@^14.217.0":
-  version "14.222.0"
-  resolved "https://registry.yarnpkg.com/@naturalcycles/js-lib/-/js-lib-14.222.0.tgz#10ac63f42857de62fe8cab3383add7d2b93db45d"
-  integrity sha512-xaaASMLWphBU8mqdl/i6MtIFnzTy9eW2SJnWUHJFgKU5UhMvYY3xPZI5cUu4+vrjAnoJlEZJPTp+QrEnZva7tg==
+  version "14.223.0"
+  resolved "https://registry.yarnpkg.com/@naturalcycles/js-lib/-/js-lib-14.223.0.tgz#248aa951857443f56cce0e1ad0a5eee0bbef9c87"
+  integrity sha512-RCcQ7D7eNGuumMO5uFUzPPoFZCYVzJRAEwpPiyyjlIeD5lyCTdbStKRBpQAywQB3oB6zk0thI6wcfq8GB8+6fQ==
   dependencies:
     tslib "^2.0.0"
     zod "^3.20.2"
 
 "@naturalcycles/nodejs-lib@^13.0.1", "@naturalcycles/nodejs-lib@^13.1.1", "@naturalcycles/nodejs-lib@^13.8.0":
-  version "13.11.0"
-  resolved "https://registry.yarnpkg.com/@naturalcycles/nodejs-lib/-/nodejs-lib-13.11.0.tgz#b6835d5eb053029cee4645fd8f4c1e0c84ad4590"
-  integrity sha512-cjkuW9exFUlBxPRhOR8SCweJmn1UP8HmgB98Fsph4vjKaYOuRZUivuPTFIrHGxpvLrOedMXhMh4Ft8SHAnA+aw==
+  version "13.12.0"
+  resolved "https://registry.yarnpkg.com/@naturalcycles/nodejs-lib/-/nodejs-lib-13.12.0.tgz#cbf7e17642ad4d80710b201456e6c239f426532d"
+  integrity sha512-9PhjT38smpBpP5xgTnIU57iPriLnFqC6G035LoXUgH/TBHJRZF360SA1hi/ERS8S/6sGPDxIyiAjpJNEWvTqxg==
   dependencies:
     "@naturalcycles/js-lib" "^14.0.0"
     "@types/js-yaml" "^4.0.9"
@@ -1638,9 +1638,9 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001587:
-  version "1.0.30001606"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001606.tgz#b4d5f67ab0746a3b8b5b6d1f06e39c51beb39a9e"
-  integrity sha512-LPbwnW4vfpJId225pwjZJOgX1m9sGfbw/RKJvw/t0QhYOOaTXHvkjVGFGPpvwEzufrjvTlsULnVTxdy4/6cqkg==
+  version "1.0.30001607"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001607.tgz#b91e8e033f6bca4e13d3d45388d87fa88931d9a5"
+  integrity sha512-WcvhVRjXLKFB/kmOFVwELtMxyhq3iM/MvmXcyCe2PNf166c39mptscOc/45TTS96n2gpNV2z7+NakArTWZCQ3w==
 
 chalk@5.3.0, chalk@^5.3.0:
   version "5.3.0"
@@ -2248,9 +2248,9 @@ eslint-plugin-unused-imports@^3.0.0:
     eslint-rule-composer "^0.3.0"
 
 eslint-plugin-vue@^9.0.0:
-  version "9.24.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-vue/-/eslint-plugin-vue-9.24.0.tgz#71209f4652ee767f18c0bf56f25991b7cdc5aa46"
-  integrity sha512-9SkJMvF8NGMT9aQCwFc5rj8Wo1XWSMSHk36i7ZwdI614BU7sIOR28ZjuFPKp8YGymZN12BSEbiSwa7qikp+PBw==
+  version "9.24.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-vue/-/eslint-plugin-vue-9.24.1.tgz#0d90330c939f9dd2f4c759da5a2ad91dc1c8bac4"
+  integrity sha512-wk3SuwmS1pZdcuJlokGYEi/buDOwD6KltvhIZyOnpJ/378dcQ4zchu9PAMbbLAaydCz1iYc5AozszcOOgZIIOg==
   dependencies:
     "@eslint-community/eslint-utils" "^4.4.0"
     globals "^13.24.0"

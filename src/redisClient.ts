@@ -120,19 +120,19 @@ export class RedisClient implements CommonClient {
     return await this.redis().mgetBuffer(keys)
   }
 
-  async set(key: string, value: string | Buffer): Promise<void> {
+  async set(key: string, value: string | number | Buffer): Promise<void> {
     await this.redis().set(key, value)
   }
 
   async setWithTTL(
     key: string,
-    value: string | Buffer,
+    value: string | number | Buffer,
     expireAt: UnixTimestampNumber,
   ): Promise<void> {
     await this.redis().set(key, value, 'EXAT', expireAt)
   }
 
-  async mset(obj: Record<string, string>): Promise<void> {
+  async mset(obj: Record<string, string | number>): Promise<void> {
     await this.redis().mset(obj)
   }
 
