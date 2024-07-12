@@ -31,7 +31,7 @@ test('saveBatch with EXAT', async () => {
   const testEntries: KeyValueDBTuple[] = testIds.map(id => [id, Buffer.from(`${id}value`)])
 
   await db.saveBatch(TEST_TABLE, testEntries, {
-    expireAt: localTime.now().plus(1, 'second').unix(),
+    expireAt: localTime.now().plus(1, 'second').unix,
   })
   let loaded = await db.getByIds(TEST_TABLE, testIds)
   expect(loaded.length).toBe(3)
