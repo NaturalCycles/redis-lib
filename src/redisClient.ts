@@ -1,4 +1,5 @@
 import {
+  AnyObject,
   CommonLogger,
   NullableBuffer,
   NullableString,
@@ -124,6 +125,38 @@ export class RedisClient implements CommonClient {
     await this.redis().set(key, value)
   }
 
+  async hgetall<T extends Record<string, string> = Record<string, string>>(
+    key: string,
+  ): Promise<T | null> {
+    const result = await this.redis().hgetall(key)
+    if (Object.keys(result).length === 0) return null
+    return result as T
+  }
+
+  async hget(key: string, field: string): Promise<NullableString> {
+    return await this.redis().hget(key, field)
+  }
+
+  async hset(key: string, value: AnyObject): Promise<void> {
+    await this.redis().hset(key, value)
+  }
+
+  async hdel(key: string, fields: string[]): Promise<void> {
+    await this.redis().hdel(key, ...fields)
+  }
+
+  async hmget(key: string, fields: string[]): Promise<NullableString[]> {
+    return await this.redis().hmget(key, ...fields)
+  }
+
+  async hmgetBuffer(key: string, fields: string[]): Promise<NullableBuffer[]> {
+    return await this.redis().hmgetBuffer(key, ...fields)
+  }
+
+  async hincr(key: string, field: string, increment: number = 1): Promise<number> {
+    return await this.redis().hincrby(key, field, increment)
+  }
+
   async setWithTTL(
     key: string,
     value: string | number | Buffer,
@@ -132,6 +165,20 @@ export class RedisClient implements CommonClient {
     await this.redis().set(key, value, 'EXAT', expireAt)
   }
 
+  async hsetWithTTL(
+    key: string,
+    value: AnyObject,
+    expireAt: UnixTimestampNumber
+  ): Promise<void> {
+    const valueKeys = Object.keys(value)
+    const numberOfKeys = valueKeys.length
+    const keyList = valueKeys.join(' ')
+    const commandString = `HEXPIREAT ${key} ${expireAt} FIELDS ${numberOfKeys} ${keyList}`
+    const [command, ...args] = commandString.split(' ')
+    await this.redis().hset(key, value)
+    await this.redis().call(command!, args)
+  }
+  
   async mset(obj: Record<string, string | number>): Promise<void> {
     await this.redis().mset(obj)
   }
@@ -140,8 +187,8 @@ export class RedisClient implements CommonClient {
     await this.redis().mset(obj)
   }
 
-  async incr(key: string): Promise<number> {
-    return await this.redis().incr(key)
+  async incr(key: string, by: number = 1): Promise<number> {
+    return await this.redis().incrby(key, by)
   }
 
   async ttl(key: string): Promise<number> {
@@ -200,6 +247,23 @@ export class RedisClient implements CommonClient {
 
     await (this.redis().scanStream(opt) as ReadableTyped<string[]>).forEach(keys => {
       count += keys.length
+    })
+
+    return count
+  }
+
+  hscanStream(key: string, opt: ScanStreamOptions): ReadableTyped<string[]> {
+    return this.redis().hscanStream(key, opt)
+  }
+
+  async hScanCount(key: string, opt: ScanStreamOptions): Promise<number> {
+    let count = 0
+
+    const stream = await this.redis().hscanStream(key, opt)
+
+    await stream.forEach((keyValueList: string[]) => {
+      console.log({ keyValueList })
+      count += keyValueList.length / 2
     })
 
     return count

@@ -118,6 +118,10 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     })
   }
 
+  async increment(table: string, id: string, by: number = 1): Promise<number> {
+    return await this.client.incr(this.idToKey(table, id), by)
+  }
+
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {
     if (!opt?.dropIfExists) return
 
