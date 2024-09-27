@@ -1,7 +1,7 @@
 import { CommonKeyValueDao } from '@naturalcycles/db-lib'
 import {
-  runCommonHashKeyValueDBTest,
-  runCommonHashKeyValueDaoTest,
+  runCommonKeyValueDBTest,
+  runCommonKeyValueDaoTest,
   TEST_TABLE,
 } from '@naturalcycles/db-lib/dist/testing'
 import { KeyValueDBTuple } from '@naturalcycles/db-lib/src/kv/commonKeyValueDB'
@@ -22,8 +22,8 @@ test('connect', async () => {
   await db.ping()
 })
 
-describe('runCommonHashKeyValueDBTest', () => runCommonHashKeyValueDBTest(db))
-describe('runCommonKeyValueDaoTest', () => runCommonHashKeyValueDaoTest(dao))
+describe('runCommonHashKeyValueDBTest', () => runCommonKeyValueDBTest(db))
+describe('runCommonKeyValueDaoTest', () => runCommonKeyValueDaoTest(dao))
 
 test('saveBatch with EXAT', async () => {
   const testIds = _range(1, 4).map(n => `id${n}`)
