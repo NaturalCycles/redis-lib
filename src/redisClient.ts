@@ -262,7 +262,6 @@ export class RedisClient implements CommonClient {
     const stream = await this.redis().hscanStream(key, opt)
 
     await stream.forEach((keyValueList: string[]) => {
-      console.log({ keyValueList })
       count += keyValueList.length / 2
     })
 
