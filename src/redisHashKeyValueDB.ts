@@ -4,14 +4,7 @@ import {
   CommonKeyValueDB,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import {
-  _chunk,
-  _isTruthy,
-  _mapObject,
-  _stringMapEntries,
-  _zip,
-  StringMap,
-} from '@naturalcycles/js-lib'
+import { _chunk, _mapObject, StringMap } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import { RedisClient } from './redisClient'
 import { RedisKeyValueDBCfg } from './redisKeyValueDB'
@@ -40,13 +33,8 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   async getByIds(table: string, ids: string[]): Promise<KeyValueDBTuple[]> {
     if (!ids.length) return []
     // we assume that the order of returned values is the same as order of input ids
-    const bufs = await this.client.hmgetBuffer(
-      this.keyOfHashField,
-      this.idsToKeys(table, ids)
-    )
-    return bufs
-      .map((buf, i) => [ids[i], buf] as KeyValueDBTuple)
-      .filter(([_k, v]) => v !== null)
+    const bufs = await this.client.hmgetBuffer(this.keyOfHashField, this.idsToKeys(table, ids))
+    return bufs.map((buf, i) => [ids[i], buf] as KeyValueDBTuple).filter(([_k, v]) => v !== null)
   }
 
   async deleteByIds(table: string, ids: string[]): Promise<void> {
@@ -57,14 +45,14 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   async saveBatch(
     table: string,
     entries: KeyValueDBTuple[],
-    opt?: CommonKeyValueDBSaveBatchOptions
+    opt?: CommonKeyValueDBSaveBatchOptions,
   ): Promise<void> {
     if (!entries.length) return
 
-    const map: StringMap<any> = _mapObject(
-      Object.fromEntries(entries),
-      (k, v) => [this.idToKey(table, String(k)), v]
-    )
+    const map: StringMap<any> = _mapObject(Object.fromEntries(entries), (k, v) => [
+      this.idToKey(table, String(k)),
+      v,
+    ])
 
     if (opt?.expireAt) {
       await this.client.hsetWithTTL(this.keyOfHashField, map, opt.expireAt)
@@ -78,7 +66,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
       .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
       })
-      .flatMap((keyValueList) => {
+      .flatMap(keyValueList => {
         const keys: string[] = []
         keyValueList.forEach((keyOrValue, index) => {
           if (index % 2 !== 0) return
@@ -100,31 +88,28 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
         match: `${table}:*`,
       })
       .flatMap(
-        async (keyValueList) => {
+        async keyValueList => {
           const values: string[] = []
           keyValueList.forEach((keyOrValue, index) => {
             if (index % 2 !== 1) return
             values.push(keyOrValue)
           })
-          return values.map((v) => Buffer.from(v))
+          return values.map(v => Buffer.from(v))
         },
         {
           concurrency: 16,
-        }
+        },
       )
       .take(limit || Infinity)
   }
 
-  streamEntries(
-    table: string,
-    limit?: number | undefined
-  ): ReadableTyped<KeyValueDBTuple> {
+  streamEntries(table: string, limit?: number | undefined): ReadableTyped<KeyValueDBTuple> {
     return this.client
       .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
       })
       .flatMap(
-        async (keyValueList) => {
+        async keyValueList => {
           const entries = _chunk(keyValueList, 2)
           return entries.map(([k, v]) => {
             return [
@@ -135,7 +120,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
         },
         {
           concurrency: 16,
-        }
+        },
       )
       .take(limit || Infinity)
   }
@@ -147,11 +132,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   async increment(table: string, id: string, by: number = 1): Promise<number> {
-    return await this.client.hincr(
-      this.keyOfHashField,
-      this.idToKey(table, id),
-      by
-    )
+    return await this.client.hincr(this.keyOfHashField, this.idToKey(table, id), by)
   }
 
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {
@@ -161,7 +142,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   private idsToKeys(table: string, ids: string[]): string[] {
-    return ids.map((id) => this.idToKey(table, id))
+    return ids.map(id => this.idToKey(table, id))
   }
 
   private idToKey(table: string, id: string): string {
@@ -169,7 +150,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   private keysToIds(table: string, keys: string[]): string[] {
-    return keys.map((key) => this.keyToId(table, key))
+    return keys.map(key => this.keyToId(table, key))
   }
 
   private keyToId(table: string, key: string): string {

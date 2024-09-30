@@ -165,11 +165,7 @@ export class RedisClient implements CommonClient {
     await this.redis().set(key, value, 'EXAT', expireAt)
   }
 
-  async hsetWithTTL(
-    key: string,
-    value: AnyObject,
-    expireAt: UnixTimestampNumber
-  ): Promise<void> {
+  async hsetWithTTL(key: string, value: AnyObject, expireAt: UnixTimestampNumber): Promise<void> {
     const valueKeys = Object.keys(value)
     const numberOfKeys = valueKeys.length
     const keyList = valueKeys.join(' ')
@@ -178,7 +174,7 @@ export class RedisClient implements CommonClient {
     await this.redis().hset(key, value)
     await this.redis().call(command!, args)
   }
-  
+
   async mset(obj: Record<string, string | number>): Promise<void> {
     await this.redis().mset(obj)
   }
