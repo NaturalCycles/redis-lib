@@ -259,7 +259,7 @@ export class RedisClient implements CommonClient {
   async hScanCount(key: string, opt: ScanStreamOptions): Promise<number> {
     let count = 0
 
-    const stream = await this.redis().hscanStream(key, opt)
+    const stream = this.redis().hscanStream(key, opt)
 
     await stream.forEach((keyValueList: string[]) => {
       count += keyValueList.length / 2
