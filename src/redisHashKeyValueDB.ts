@@ -126,7 +126,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   async count(table: string): Promise<number> {
-    return await this.client.hScanCount(this.keyOfHashField, {
+    return await this.client.hscanCount(this.keyOfHashField, {
       match: `${table}:*`,
     })
   }

@@ -95,18 +95,18 @@ describe('hashmap functions', () => {
     expect(result).toBe(1)
   })
 
-  test('hScanCount should return the number of keys in the hash', async () => {
+  test('hscanCount should return the number of keys in the hash', async () => {
     await client.hset('test:key', { one: 1, two: 2, three: 3 })
 
-    const result = await client.hScanCount('test:key', {})
+    const result = await client.hscanCount('test:key', {})
 
     expect(result).toBe(3)
   })
 
-  test('hScanCount with a match pattern should return the number of matching keys in the hash', async () => {
+  test('hscanCount with a match pattern should return the number of matching keys in the hash', async () => {
     await client.hset('test:key', { one: 1, two: 2, three: 3 })
 
-    const result = await client.hScanCount('test:key', { match: 't*' })
+    const result = await client.hscanCount('test:key', { match: 't*' })
 
     expect(result).toBe(2)
   })
