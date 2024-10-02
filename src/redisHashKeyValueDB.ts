@@ -86,7 +86,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
         match: `${table}:*`,
       })
       .flatMap(
-        async keyValueList => {
+        keyValueList => {
           const values: string[] = []
           keyValueList.forEach((keyOrValue, index) => {
             if (index % 2 !== 1) return
@@ -107,7 +107,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
         match: `${table}:*`,
       })
       .flatMap(
-        async keyValueList => {
+        keyValueList => {
           const entries = _chunk(keyValueList, 2)
           return entries.map(([k, v]) => {
             return [
