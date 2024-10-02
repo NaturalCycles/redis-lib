@@ -4,20 +4,23 @@ import {
   CommonKeyValueDB,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import { _isTruthy, _zip } from '@naturalcycles/js-lib'
+import { _chunk, StringMap } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import { RedisClient } from './redisClient'
+import { RedisKeyValueDBCfg } from './redisKeyValueDB'
 
-export interface RedisKeyValueDBCfg {
-  client: RedisClient
+export interface RedisHashKeyValueDBCfg extends RedisKeyValueDBCfg {
+  hashKey: string
 }
 
-export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
-  constructor(cfg: RedisKeyValueDBCfg) {
-    this.client = cfg.client
-  }
-
+export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   client: RedisClient
+  keyOfHashField: string
+
+  constructor(cfg: RedisHashKeyValueDBCfg) {
+    this.client = cfg.client
+    this.keyOfHashField = cfg.hashKey
+  }
 
   async ping(): Promise<void> {
     await this.client.ping()
@@ -30,13 +33,13 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   async getByIds(table: string, ids: string[]): Promise<KeyValueDBTuple[]> {
     if (!ids.length) return []
     // we assume that the order of returned values is the same as order of input ids
-    const bufs = await this.client.mgetBuffer(this.idsToKeys(table, ids))
+    const bufs = await this.client.hmgetBuffer(this.keyOfHashField, this.idsToKeys(table, ids))
     return bufs.map((buf, i) => [ids[i], buf] as KeyValueDBTuple).filter(([_k, v]) => v !== null)
   }
 
   async deleteByIds(table: string, ids: string[]): Promise<void> {
     if (!ids.length) return
-    await this.client.del(this.idsToKeys(table, ids))
+    await this.client.hdel(this.keyOfHashField, this.idsToKeys(table, ids))
   }
 
   async saveBatch(
@@ -46,29 +49,29 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   ): Promise<void> {
     if (!entries.length) return
 
+    const entriesWithKey = entries.map(([k, v]) => [this.idToKey(table, k), v])
+    const map: StringMap<any> = Object.fromEntries(entriesWithKey)
+
     if (opt?.expireAt) {
-      // There's no supported mset with TTL: https://stackoverflow.com/questions/16423342/redis-multi-set-with-a-ttl
-      // so we gonna use a pipeline instead
-      await this.client.withPipeline(pipeline => {
-        for (const [k, v] of entries) {
-          pipeline.set(this.idToKey(table, k), v, 'EXAT', opt.expireAt!)
-        }
-      })
+      await this.client.hsetWithTTL(this.keyOfHashField, map, opt.expireAt)
     } else {
-      const obj: Record<string, Buffer> = Object.fromEntries(
-        entries.map(([k, v]) => [this.idToKey(table, k), v]) as KeyValueDBTuple[],
-      )
-      await this.client.msetBuffer(obj)
+      await this.client.hset(this.keyOfHashField, map)
     }
   }
 
   streamIds(table: string, limit?: number): ReadableTyped<string> {
     let stream = this.client
-      .scanStream({
+      .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
-        // count: limit, // count is actually a "batchSize", not a limit
       })
-      .flatMap(keys => this.keysToIds(table, keys))
+      .flatMap(keyValueList => {
+        const keys: string[] = []
+        keyValueList.forEach((keyOrValue, index) => {
+          if (index % 2 !== 0) return
+          keys.push(keyOrValue)
+        })
+        return this.keysToIds(table, keys)
+      })
 
     if (limit) {
       stream = stream.take(limit)
@@ -79,47 +82,42 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
 
   streamValues(table: string, limit?: number): ReadableTyped<Buffer> {
     return this.client
-      .scanStream({
+      .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
       })
-      .flatMap(
-        async keys => {
-          return (await this.client.mgetBuffer(keys)).filter(_isTruthy)
-        },
-        {
-          concurrency: 16,
-        },
-      )
+      .flatMap(keyValueList => {
+        const values: string[] = []
+        keyValueList.forEach((keyOrValue, index) => {
+          if (index % 2 !== 1) return
+          values.push(keyOrValue)
+        })
+        return values.map(v => Buffer.from(v))
+      })
       .take(limit || Infinity)
   }
 
   streamEntries(table: string, limit?: number | undefined): ReadableTyped<KeyValueDBTuple> {
     return this.client
-      .scanStream({
+      .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
       })
-      .flatMap(
-        async keys => {
-          // casting as Buffer[], because values are expected to exist for given keys
-          const bufs = (await this.client.mgetBuffer(keys)) as Buffer[]
-          return _zip(this.keysToIds(table, keys), bufs)
-        },
-        {
-          concurrency: 16,
-        },
-      )
+      .flatMap(keyValueList => {
+        const entries = _chunk(keyValueList, 2)
+        return entries.map(([k, v]) => {
+          return [this.keyToId(table, String(k)), Buffer.from(String(v))] satisfies KeyValueDBTuple
+        })
+      })
       .take(limit || Infinity)
   }
 
   async count(table: string): Promise<number> {
-    // todo: implement more efficiently, e.g via LUA?
-    return await this.client.scanCount({
+    return await this.client.hscanCount(this.keyOfHashField, {
       match: `${table}:*`,
     })
   }
 
   async increment(table: string, id: string, by: number = 1): Promise<number> {
-    return await this.client.incr(this.idToKey(table, id), by)
+    return await this.client.hincr(this.keyOfHashField, this.idToKey(table, id), by)
   }
 
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {
