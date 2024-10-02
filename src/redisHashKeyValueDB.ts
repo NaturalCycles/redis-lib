@@ -4,7 +4,7 @@ import {
   CommonKeyValueDB,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import { _chunk, _mapObject, StringMap } from '@naturalcycles/js-lib'
+import { _chunk, StringMap } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import { RedisClient } from './redisClient'
 import { RedisKeyValueDBCfg } from './redisKeyValueDB'
@@ -49,10 +49,8 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   ): Promise<void> {
     if (!entries.length) return
 
-    const map: StringMap<any> = _mapObject(Object.fromEntries(entries), (k, v) => [
-      this.idToKey(table, String(k)),
-      v,
-    ])
+    const entriesWithKey = entries.map(([k, v]) => [this.idToKey(table, k), v])
+    const map: StringMap<any> = Object.fromEntries(entriesWithKey)
 
     if (opt?.expireAt) {
       await this.client.hsetWithTTL(this.keyOfHashField, map, opt.expireAt)
