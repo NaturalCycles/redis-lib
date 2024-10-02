@@ -85,19 +85,14 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
       .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
       })
-      .flatMap(
-        keyValueList => {
-          const values: string[] = []
-          keyValueList.forEach((keyOrValue, index) => {
-            if (index % 2 !== 1) return
-            values.push(keyOrValue)
-          })
-          return values.map(v => Buffer.from(v))
-        },
-        {
-          concurrency: 16,
-        },
-      )
+      .flatMap(keyValueList => {
+        const values: string[] = []
+        keyValueList.forEach((keyOrValue, index) => {
+          if (index % 2 !== 1) return
+          values.push(keyOrValue)
+        })
+        return values.map(v => Buffer.from(v))
+      })
       .take(limit || Infinity)
   }
 
@@ -106,20 +101,12 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
       .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
       })
-      .flatMap(
-        keyValueList => {
-          const entries = _chunk(keyValueList, 2)
-          return entries.map(([k, v]) => {
-            return [
-              this.keyToId(table, String(k)),
-              Buffer.from(String(v)),
-            ] satisfies KeyValueDBTuple
-          })
-        },
-        {
-          concurrency: 16,
-        },
-      )
+      .flatMap(keyValueList => {
+        const entries = _chunk(keyValueList, 2)
+        return entries.map(([k, v]) => {
+          return [this.keyToId(table, String(k)), Buffer.from(String(v))] satisfies KeyValueDBTuple
+        })
+      })
       .take(limit || Infinity)
   }
 
