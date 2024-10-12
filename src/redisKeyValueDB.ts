@@ -1,10 +1,11 @@
 import {
-  CommonKeyValueDBSaveBatchOptions,
   CommonDBCreateOptions,
   CommonKeyValueDB,
+  commonKeyValueDBFullSupport,
+  CommonKeyValueDBSaveBatchOptions,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import { _isTruthy, _zip } from '@naturalcycles/js-lib'
+import { _isTruthy, _zip, StringMap } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import { RedisClient } from './redisClient'
 
@@ -18,6 +19,10 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   client: RedisClient
+
+  support = {
+    ...commonKeyValueDBFullSupport,
+  }
 
   async ping(): Promise<void> {
     await this.client.ping()
@@ -93,7 +98,7 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
       .take(limit || Infinity)
   }
 
-  streamEntries(table: string, limit?: number | undefined): ReadableTyped<KeyValueDBTuple> {
+  streamEntries(table: string, limit?: number): ReadableTyped<KeyValueDBTuple> {
     return this.client
       .scanStream({
         match: `${table}:*`,
@@ -118,8 +123,15 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     })
   }
 
-  async increment(table: string, id: string, by: number = 1): Promise<number> {
+  async increment(table: string, id: string, by = 1): Promise<number> {
     return await this.client.incr(this.idToKey(table, id), by)
+  }
+
+  async incrementBatch(
+    _table: string,
+    _incrementMap: StringMap<number>,
+  ): Promise<StringMap<number>> {
+    throw new Error('Not implemented')
   }
 
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {

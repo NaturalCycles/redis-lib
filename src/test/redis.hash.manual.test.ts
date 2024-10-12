@@ -1,7 +1,7 @@
 import { CommonKeyValueDao } from '@naturalcycles/db-lib'
 import {
-  runCommonKeyValueDBTest,
   runCommonKeyValueDaoTest,
+  runCommonKeyValueDBTest,
   TEST_TABLE,
 } from '@naturalcycles/db-lib/dist/testing'
 import { KeyValueDBTuple } from '@naturalcycles/db-lib/src/kv/commonKeyValueDB'

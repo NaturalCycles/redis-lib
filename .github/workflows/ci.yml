@@ -13,7 +13,7 @@ jobs:
       - { uses: actions/setup-node@v4, with: { node-version: 'lts/*', cache: 'yarn' } }
       - run: yarn --frozen-lockfile
       - name: build
-        run: yarn build
+        run: yarn dev-lib tsc
       - name: test
         run: yarn test
 
@@ -34,7 +34,7 @@ jobs:
           key: npm-v1-${{ runner.os }}
 
       - run: yarn --frozen-lockfile
-      - run: yarn build-prod
+      - run: yarn build
 
       - name: release
         env:

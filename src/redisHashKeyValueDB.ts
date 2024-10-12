@@ -1,7 +1,8 @@
 import {
-  CommonKeyValueDBSaveBatchOptions,
   CommonDBCreateOptions,
   CommonKeyValueDB,
+  commonKeyValueDBFullSupport,
+  CommonKeyValueDBSaveBatchOptions,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
 import { _chunk, StringMap } from '@naturalcycles/js-lib'
@@ -20,6 +21,10 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   constructor(cfg: RedisHashKeyValueDBCfg) {
     this.client = cfg.client
     this.keyOfHashField = cfg.hashKey
+  }
+
+  support = {
+    ...commonKeyValueDBFullSupport,
   }
 
   async ping(): Promise<void> {
@@ -96,7 +101,7 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
       .take(limit || Infinity)
   }
 
-  streamEntries(table: string, limit?: number | undefined): ReadableTyped<KeyValueDBTuple> {
+  streamEntries(table: string, limit?: number): ReadableTyped<KeyValueDBTuple> {
     return this.client
       .hscanStream(this.keyOfHashField, {
         match: `${table}:*`,
@@ -116,8 +121,15 @@ export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     })
   }
 
-  async increment(table: string, id: string, by: number = 1): Promise<number> {
+  async increment(table: string, id: string, by = 1): Promise<number> {
     return await this.client.hincr(this.keyOfHashField, this.idToKey(table, id), by)
+  }
+
+  async incrementBatch(
+    _table: string,
+    _incrementMap: StringMap<number>,
+  ): Promise<StringMap<number>> {
+    throw new Error('Not implemented')
   }
 
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {

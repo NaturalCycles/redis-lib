@@ -7,9 +7,9 @@ import {
   UnixTimestampNumber,
 } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
-// eslint-disable-next-line import/no-duplicates
+// eslint-disable-next-line import-x/no-duplicates
 import type { Redis, RedisOptions } from 'ioredis'
-// eslint-disable-next-line import/no-duplicates
+// eslint-disable-next-line import-x/no-duplicates
 import type * as RedisLib from 'ioredis'
 import type { ScanStreamOptions } from 'ioredis/built/types'
 import type { ChainableCommander } from 'ioredis/built/utils/RedisCommander'
@@ -153,7 +153,7 @@ export class RedisClient implements CommonClient {
     return await this.redis().hmgetBuffer(key, ...fields)
   }
 
-  async hincr(key: string, field: string, increment: number = 1): Promise<number> {
+  async hincr(key: string, field: string, increment = 1): Promise<number> {
     return await this.redis().hincrby(key, field, increment)
   }
 
@@ -183,7 +183,7 @@ export class RedisClient implements CommonClient {
     await this.redis().mset(obj)
   }
 
-  async incr(key: string, by: number = 1): Promise<number> {
+  async incr(key: string, by = 1): Promise<number> {
     return await this.redis().incrby(key, by)
   }
 
@@ -234,6 +234,7 @@ export class RedisClient implements CommonClient {
    * Like scanStream, but flattens the stream of keys.
    */
   scanStreamFlat(opt: ScanStreamOptions): ReadableTyped<string> {
+    // biome-ignore lint/correctness/noFlatMapIdentity: ok
     return (this.redis().scanStream(opt) as ReadableTyped<string[]>).flatMap(keys => keys)
   }
 
