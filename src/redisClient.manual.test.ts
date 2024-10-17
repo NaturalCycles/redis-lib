@@ -16,6 +16,21 @@ afterAll(async () => {
   await client.disconnect()
 })
 
+test('incrBatch should increase multiple keys', async () => {
+  await client.set('test:one', 1)
+  await client.set('test:two', 2)
+
+  const result = await client.incrBatch([
+    ['test:one', 1],
+    ['test:two', 2],
+  ])
+
+  expect(result).toEqual([
+    ['test:one', 2],
+    ['test:two', 4],
+  ])
+})
+
 describe('hashmap functions', () => {
   test('hset should save a map', async () => {
     await client.hset('test:key', { foo: 'bar' })
@@ -93,6 +108,20 @@ describe('hashmap functions', () => {
     const result = await client.hincr('test:key', 'one')
 
     expect(result).toBe(1)
+  })
+
+  test('hincrBatch should increase multiple keys', async () => {
+    await client.hset('test:key', { one: 1, two: 2 })
+
+    const result = await client.hincrBatch('test:key', [
+      ['one', 1],
+      ['two', 2],
+    ])
+
+    expect(result).toEqual([
+      ['one', 2],
+      ['two', 4],
+    ])
   })
 
   test('hscanCount should return the number of keys in the hash', async () => {
