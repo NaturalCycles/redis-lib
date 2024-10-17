@@ -149,7 +149,7 @@ describe('hashmap functions', () => {
     expect(result).toEqual({ one: '1' })
   })
 
-  test('hsetWithTTL should set the fields with expiry', async () => {
+  test.skip('hsetWithTTL should set the fields with expiry', async () => {
     const now = localTime.now().unix
 
     await client.hsetWithTTL('test:key', { foo1: 'bar' }, now + 1000)

@@ -25,7 +25,7 @@ test('connect', async () => {
 describe('runCommonHashKeyValueDBTest', () => runCommonKeyValueDBTest(db))
 describe('runCommonKeyValueDaoTest', () => runCommonKeyValueDaoTest(dao))
 
-test('saveBatch with EXAT', async () => {
+test.skip('saveBatch with EXAT', async () => {
   const testIds = _range(1, 4).map(n => `id${n}`)
   const testEntries: KeyValueDBTuple[] = testIds.map(id => [id, Buffer.from(`${id}value`)])
 

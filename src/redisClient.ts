@@ -186,14 +186,19 @@ export class RedisClient implements CommonClient {
     await this.redis().set(key, value, 'EXAT', expireAt)
   }
 
-  async hsetWithTTL(key: string, value: AnyObject, expireAt: UnixTimestampNumber): Promise<void> {
-    const valueKeys = Object.keys(value)
-    const numberOfKeys = valueKeys.length
-    const keyList = valueKeys.join(' ')
-    const commandString = `HEXPIREAT ${key} ${expireAt} FIELDS ${numberOfKeys} ${keyList}`
-    const [command, ...args] = commandString.split(' ')
-    await this.redis().hset(key, value)
-    await this.redis().call(command!, args)
+  async hsetWithTTL(
+    _key: string,
+    _value: AnyObject,
+    _expireAt: UnixTimestampNumber,
+  ): Promise<void> {
+    throw new Error('Not supported until Redis 7.4.0')
+    // const valueKeys = Object.keys(value)
+    // const numberOfKeys = valueKeys.length
+    // const keyList = valueKeys.join(' ')
+    // const commandString = `HEXPIREAT ${key} ${expireAt} FIELDS ${numberOfKeys} ${keyList}`
+    // const [command, ...args] = commandString.split(' ')
+    // await this.redis().hset(key, value)
+    // await this.redis().call(command!, args)
   }
 
   async mset(obj: Record<string, string | number>): Promise<void> {
