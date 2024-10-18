@@ -8,7 +8,6 @@ import {
 } from '@naturalcycles/db-lib'
 import { _chunk } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
-import { RedisClient } from './redisClient'
 import { RedisKeyValueDBCfg } from './redisKeyValueDB'
 
 /**
@@ -24,34 +23,30 @@ import { RedisKeyValueDBCfg } from './redisKeyValueDB'
  * this implementation can take over for RedisKeyValueDB.
  */
 export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
-  constructor(cfg: RedisKeyValueDBCfg) {
-    this.client = cfg.client
-  }
-
-  client: RedisClient
+  constructor(public cfg: RedisKeyValueDBCfg) {}
 
   support = {
     ...commonKeyValueDBFullSupport,
   }
 
   async ping(): Promise<void> {
-    await this.client.ping()
+    await this.cfg.client.ping()
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    await this.client.disconnect()
+    await this.cfg.client.disconnect()
   }
 
   async getByIds(table: string, ids: string[]): Promise<KeyValueDBTuple[]> {
     if (!ids.length) return []
     // we assume that the order of returned values is the same as order of input ids
-    const bufs = await this.client.hmgetBuffer(table, ids)
+    const bufs = await this.cfg.client.hmgetBuffer(table, ids)
     return bufs.map((buf, i) => [ids[i], buf] as KeyValueDBTuple).filter(([_k, v]) => v !== null)
   }
 
   async deleteByIds(table: string, ids: string[]): Promise<void> {
     if (!ids.length) return
-    await this.client.hdel(table, ids)
+    await this.cfg.client.hdel(table, ids)
   }
 
   async saveBatch(
@@ -64,14 +59,14 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     const record = Object.fromEntries(entries)
 
     if (opt?.expireAt) {
-      await this.client.hsetWithTTL(table, record, opt.expireAt)
+      await this.cfg.client.hsetWithTTL(table, record, opt.expireAt)
     } else {
-      await this.client.hset(table, record)
+      await this.cfg.client.hset(table, record)
     }
   }
 
   streamIds(table: string, limit?: number): ReadableTyped<string> {
-    const stream = this.client
+    const stream = this.cfg.client
       .hscanStream(table)
       .flatMap(keyValueList => {
         const keys: string[] = []
@@ -87,7 +82,7 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   streamValues(table: string, limit?: number): ReadableTyped<Buffer> {
-    return this.client
+    return this.cfg.client
       .hscanStream(table)
       .flatMap(keyValueList => {
         const values: string[] = []
@@ -101,7 +96,7 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   streamEntries(table: string, limit?: number): ReadableTyped<KeyValueDBTuple> {
-    return this.client
+    return this.cfg.client
       .hscanStream(table)
       .flatMap(keyValueList => {
         const entries = _chunk(keyValueList, 2) as [string, string][]
@@ -113,16 +108,16 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   }
 
   async count(table: string): Promise<number> {
-    return await this.client.hscanCount(table)
+    return await this.cfg.client.hscanCount(table)
   }
 
   async incrementBatch(table: string, increments: IncrementTuple[]): Promise<IncrementTuple[]> {
-    return await this.client.hincrBatch(table, increments)
+    return await this.cfg.client.hincrBatch(table, increments)
   }
 
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {
     if (!opt?.dropIfExists) return
 
-    await this.client.del([table])
+    await this.cfg.client.del([table])
   }
 }
