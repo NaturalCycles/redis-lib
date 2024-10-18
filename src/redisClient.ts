@@ -1,9 +1,11 @@
 import {
+  _stringMapEntries,
   AnyObject,
   CommonLogger,
   NullableBuffer,
   NullableString,
   Promisable,
+  StringMap,
   UnixTimestampNumber,
 } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
@@ -157,6 +159,25 @@ export class RedisClient implements CommonClient {
     return await this.redis().hincrby(key, field, increment)
   }
 
+  async hincrBatch(key: string, incrementTuples: [string, number][]): Promise<[string, number][]> {
+    const results: StringMap<number | undefined> = {}
+
+    await this.withPipeline(async pipeline => {
+      for (const [field, increment] of incrementTuples) {
+        pipeline.hincrby(key, field, increment, (_err, newValue) => {
+          results[field] = newValue
+        })
+      }
+    })
+
+    const validResults = _stringMapEntries(results).filter(([_, v]) => v !== undefined) as [
+      string,
+      number,
+    ][]
+
+    return validResults
+  }
+
   async setWithTTL(
     key: string,
     value: string | number | Buffer,
@@ -165,14 +186,19 @@ export class RedisClient implements CommonClient {
     await this.redis().set(key, value, 'EXAT', expireAt)
   }
 
-  async hsetWithTTL(key: string, value: AnyObject, expireAt: UnixTimestampNumber): Promise<void> {
-    const valueKeys = Object.keys(value)
-    const numberOfKeys = valueKeys.length
-    const keyList = valueKeys.join(' ')
-    const commandString = `HEXPIREAT ${key} ${expireAt} FIELDS ${numberOfKeys} ${keyList}`
-    const [command, ...args] = commandString.split(' ')
-    await this.redis().hset(key, value)
-    await this.redis().call(command!, args)
+  async hsetWithTTL(
+    _key: string,
+    _value: AnyObject,
+    _expireAt: UnixTimestampNumber,
+  ): Promise<void> {
+    throw new Error('Not supported until Redis 7.4.0')
+    // const valueKeys = Object.keys(value)
+    // const numberOfKeys = valueKeys.length
+    // const keyList = valueKeys.join(' ')
+    // const commandString = `HEXPIREAT ${key} ${expireAt} FIELDS ${numberOfKeys} ${keyList}`
+    // const [command, ...args] = commandString.split(' ')
+    // await this.redis().hset(key, value)
+    // await this.redis().call(command!, args)
   }
 
   async mset(obj: Record<string, string | number>): Promise<void> {
@@ -185,6 +211,25 @@ export class RedisClient implements CommonClient {
 
   async incr(key: string, by = 1): Promise<number> {
     return await this.redis().incrby(key, by)
+  }
+
+  async incrBatch(incrementTuples: [string, number][]): Promise<[string, number][]> {
+    const results: StringMap<number | undefined> = {}
+
+    await this.withPipeline(async pipeline => {
+      for (const [key, increment] of incrementTuples) {
+        pipeline.incrby(key, increment, (_err, newValue) => {
+          results[key] = newValue
+        })
+      }
+    })
+
+    const validResults = _stringMapEntries(results).filter(([_, v]) => v !== undefined) as [
+      string,
+      number,
+    ][]
+
+    return validResults
   }
 
   async ttl(key: string): Promise<number> {
