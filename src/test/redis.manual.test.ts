@@ -9,7 +9,7 @@ import { RedisKeyValueDB } from '../redisKeyValueDB'
 const client = new RedisClient()
 const db = new RedisKeyValueDB({ client })
 
-const dao = new CommonKeyValueDao<Buffer>({
+const dao = new CommonKeyValueDao<string, Buffer>({
   db,
   table: TEST_TABLE,
 })
@@ -23,8 +23,7 @@ test('connect', async () => {
 })
 
 describe('runCommonKeyValueDBTest', () => runCommonKeyValueDBTest(db))
-
-describe('runCommonKeyValueDaoTest', () => runCommonKeyValueDaoTest(dao))
+describe('runCommonKeyValueDaoTest', () => runCommonKeyValueDaoTest(db))
 
 test('saveBatch with EXAT', async () => {
   const testIds = _range(1, 4).map(n => `id${n}`)

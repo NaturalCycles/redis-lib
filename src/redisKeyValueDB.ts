@@ -3,9 +3,10 @@ import {
   CommonKeyValueDB,
   commonKeyValueDBFullSupport,
   CommonKeyValueDBSaveBatchOptions,
+  IncrementTuple,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import { _isTruthy, _zip, StringMap } from '@naturalcycles/js-lib'
+import { _isTruthy, _zip } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import { RedisClient } from './redisClient'
 
@@ -123,15 +124,15 @@ export class RedisKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     })
   }
 
-  async increment(table: string, id: string, by = 1): Promise<number> {
-    return await this.client.incr(this.idToKey(table, id), by)
-  }
-
-  async incrementBatch(
-    _table: string,
-    _incrementMap: StringMap<number>,
-  ): Promise<StringMap<number>> {
-    throw new Error('Not implemented')
+  async incrementBatch(table: string, increments: IncrementTuple[]): Promise<IncrementTuple[]> {
+    const incrementTuplesWithInternalKeys = increments.map(
+      ([id, v]) => [this.idToKey(table, id), v] as [string, number],
+    )
+    const resultsWithInternalKeys = await this.client.incrBatch(incrementTuplesWithInternalKeys)
+    const results = resultsWithInternalKeys.map(
+      ([k, v]) => [this.keyToId(table, k), v] as IncrementTuple,
+    )
+    return results
   }
 
   async createTable(table: string, opt?: CommonDBCreateOptions): Promise<void> {
