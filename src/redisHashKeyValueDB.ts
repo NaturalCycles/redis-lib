@@ -6,7 +6,6 @@ import {
   IncrementTuple,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import { _chunk } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import { RedisKeyValueDBCfg } from './redisKeyValueDB'
 
@@ -70,10 +69,9 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
       .hscanStream(table)
       .flatMap(keyValueList => {
         const keys: string[] = []
-        keyValueList.forEach((keyOrValue, index) => {
-          if (index % 2 !== 0) return
-          keys.push(keyOrValue)
-        })
+        for (let i = 0; i < keyValueList.length; i += 2) {
+          keys.push(keyValueList[i]!)
+        }
         return keys
       })
       .take(limit || Infinity)
@@ -85,12 +83,12 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     return this.cfg.client
       .hscanStream(table)
       .flatMap(keyValueList => {
-        const values: string[] = []
-        keyValueList.forEach((keyOrValue, index) => {
-          if (index % 2 !== 1) return
-          values.push(keyOrValue)
-        })
-        return values.map(v => Buffer.from(v))
+        const values: Buffer[] = []
+        for (let i = 0; i < keyValueList.length; i += 2) {
+          const value = Buffer.from(keyValueList[i + 1]!)
+          values.push(value)
+        }
+        return values
       })
       .take(limit || Infinity)
   }
@@ -99,10 +97,13 @@ export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
     return this.cfg.client
       .hscanStream(table)
       .flatMap(keyValueList => {
-        const entries = _chunk(keyValueList, 2) as [string, string][]
-        return entries.map(([k, v]) => {
-          return [k, Buffer.from(String(v))] satisfies KeyValueDBTuple
-        })
+        const entries: [string, Buffer][] = []
+        for (let i = 0; i < keyValueList.length; i += 2) {
+          const key = keyValueList[i]!
+          const value = Buffer.from(keyValueList[i + 1]!)
+          entries.push([key, value])
+        }
+        return entries
       })
       .take(limit || Infinity)
   }
