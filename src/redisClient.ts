@@ -271,7 +271,7 @@ export class RedisClient implements CommonClient {
    Convenient type-safe wrapper.
    Returns BATCHES of keys in each iteration (as-is).
    */
-  scanStream(opt: ScanStreamOptions): ReadableTyped<string[]> {
+  scanStream(opt?: ScanStreamOptions): ReadableTyped<string[]> {
     return this.redis().scanStream(opt)
   }
 
@@ -294,11 +294,11 @@ export class RedisClient implements CommonClient {
     return count
   }
 
-  hscanStream(key: string, opt: ScanStreamOptions): ReadableTyped<string[]> {
+  hscanStream(key: string, opt?: ScanStreamOptions): ReadableTyped<string[]> {
     return this.redis().hscanStream(key, opt)
   }
 
-  async hscanCount(key: string, opt: ScanStreamOptions): Promise<number> {
+  async hscanCount(key: string, opt?: ScanStreamOptions): Promise<number> {
     let count = 0
 
     const stream = this.redis().hscanStream(key, opt)
