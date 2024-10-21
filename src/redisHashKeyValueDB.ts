@@ -21,7 +21,7 @@ import { RedisKeyValueDBCfg } from './redisKeyValueDB'
  * Once the available Redis version reaches 7.4.0+,
  * this implementation can take over for RedisKeyValueDB.
  */
-export class RedishHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
+export class RedisHashKeyValueDB implements CommonKeyValueDB, AsyncDisposable {
   constructor(public cfg: RedisKeyValueDBCfg) {}
 
   support = {

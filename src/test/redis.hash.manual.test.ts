@@ -4,10 +4,10 @@ import { runCommonKeyValueDaoTest } from '@naturalcycles/db-lib/dist/testing/key
 import { KeyValueDBTuple } from '@naturalcycles/db-lib/src/kv/commonKeyValueDB'
 import { _AsyncMemo, _range, localTime, pDelay } from '@naturalcycles/js-lib'
 import { RedisClient } from '../redisClient'
-import { RedishHashKeyValueDB } from '../redisHashKeyValueDB'
+import { RedisHashKeyValueDB } from '../redisHashKeyValueDB'
 
 const client = new RedisClient()
-const db = new RedishHashKeyValueDB({ client })
+const db = new RedisHashKeyValueDB({ client })
 
 const dao = new CommonKeyValueDao<string, Buffer>({
   db,
