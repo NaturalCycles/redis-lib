@@ -1,4 +1,4 @@
-import { localTime } from '@naturalcycles/js-lib'
+import { localTime, UnixTimestamp } from '@naturalcycles/js-lib'
 import { RedisClient } from './redisClient'
 
 let client: RedisClient
@@ -152,8 +152,8 @@ describe('hashmap functions', () => {
   test.skip('hsetWithTTL should set the fields with expiry', async () => {
     const now = localTime.now().unix
 
-    await client.hsetWithTTL('test:key', { foo1: 'bar' }, now + 1000)
-    await client.hsetWithTTL('test:key', { foo2: 'bar' }, now - 1)
+    await client.hsetWithTTL('test:key', { foo1: 'bar' }, (now + 1000) as UnixTimestamp)
+    await client.hsetWithTTL('test:key', { foo2: 'bar' }, (now - 1) as UnixTimestamp)
 
     const result = await client.hgetall('test:key')
     expect(result).toEqual({ foo1: 'bar' })

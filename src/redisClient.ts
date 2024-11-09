@@ -6,12 +6,10 @@ import {
   NullableString,
   Promisable,
   StringMap,
-  UnixTimestampNumber,
+  UnixTimestamp,
 } from '@naturalcycles/js-lib'
 import { ReadableTyped } from '@naturalcycles/nodejs-lib'
-// eslint-disable-next-line import-x/no-duplicates
 import type { Redis, RedisOptions } from 'ioredis'
-// eslint-disable-next-line import-x/no-duplicates
 import type * as RedisLib from 'ioredis'
 import type { ScanStreamOptions } from 'ioredis/built/types'
 import type { ChainableCommander } from 'ioredis/built/utils/RedisCommander'
@@ -181,16 +179,12 @@ export class RedisClient implements CommonClient {
   async setWithTTL(
     key: string,
     value: string | number | Buffer,
-    expireAt: UnixTimestampNumber,
+    expireAt: UnixTimestamp,
   ): Promise<void> {
     await this.redis().set(key, value, 'EXAT', expireAt)
   }
 
-  async hsetWithTTL(
-    _key: string,
-    _value: AnyObject,
-    _expireAt: UnixTimestampNumber,
-  ): Promise<void> {
+  async hsetWithTTL(_key: string, _value: AnyObject, _expireAt: UnixTimestamp): Promise<void> {
     throw new Error('Not supported until Redis 7.4.0')
     // const valueKeys = Object.keys(value)
     // const numberOfKeys = valueKeys.length
