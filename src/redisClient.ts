@@ -1,5 +1,7 @@
+import { Transform } from 'node:stream'
 import type {
   AnyObject,
+  AsyncFunction,
   CommonLogger,
   NullableBuffer,
   NullableString,
@@ -10,7 +12,6 @@ import type {
 import { _stringMapEntries } from '@naturalcycles/js-lib'
 import type { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import type { Redis, RedisOptions } from 'ioredis'
-import type * as RedisLib from 'ioredis'
 import type { ScanStreamOptions } from 'ioredis/built/types.js'
 import type { ChainableCommander } from 'ioredis/built/utils/RedisCommander.js'
 
@@ -57,11 +58,11 @@ export class RedisClient implements CommonClient {
 
   private _redis?: Redis
 
-  redis(): Redis {
+  async redis(): Promise<Redis> {
     if (this._redis) return this._redis
 
     // lazy-load the library
-    const redisLib = require('ioredis') as typeof RedisLib
+    const { default: redisLib } = await import('ioredis')
     const redis = new redisLib.Redis(this.cfg.redisOptions)
 
     const { logger } = this.cfg
@@ -82,14 +83,16 @@ export class RedisClient implements CommonClient {
 
   async connect(): Promise<void> {
     if (!this.connected) {
-      await this.redis().connect()
+      const redis = await this.redis()
+      await redis.connect()
       this.connected = true
     }
   }
 
   async disconnect(): Promise<void> {
+    const redis = await this.redis()
     this.log('redis: quit...')
-    this.log(`redis: quit`, await this.redis().quit())
+    this.log(`redis: quit`, await redis.quit())
     this.connected = false
   }
 
@@ -98,63 +101,77 @@ export class RedisClient implements CommonClient {
   }
 
   async ping(): Promise<void> {
-    await this.redis().ping()
+    const redis = await this.redis()
+    await redis.ping()
   }
 
   async del(keys: string[]): Promise<number> {
-    return await this.redis().del(keys)
+    const redis = await this.redis()
+    return await redis.del(keys)
   }
 
   async get(key: string): Promise<NullableString> {
-    return await this.redis().get(key)
+    const redis = await this.redis()
+    return await redis.get(key)
   }
 
   async getBuffer(key: string): Promise<NullableBuffer> {
-    return await this.redis().getBuffer(key)
+    const redis = await this.redis()
+    return await redis.getBuffer(key)
   }
 
   async mget(keys: string[]): Promise<NullableString[]> {
-    return await this.redis().mget(keys)
+    const redis = await this.redis()
+    return await redis.mget(keys)
   }
 
   async mgetBuffer(keys: string[]): Promise<NullableBuffer[]> {
-    return await this.redis().mgetBuffer(keys)
+    const redis = await this.redis()
+    return await redis.mgetBuffer(keys)
   }
 
   async set(key: string, value: string | number | Buffer): Promise<void> {
-    await this.redis().set(key, value)
+    const redis = await this.redis()
+    await redis.set(key, value)
   }
 
   async hgetall<T extends Record<string, string> = Record<string, string>>(
     key: string,
   ): Promise<T | null> {
-    const result = await this.redis().hgetall(key)
+    const redis = await this.redis()
+    const result = await redis.hgetall(key)
     if (Object.keys(result).length === 0) return null
     return result as T
   }
 
   async hget(key: string, field: string): Promise<NullableString> {
-    return await this.redis().hget(key, field)
+    const redis = await this.redis()
+    return await redis.hget(key, field)
   }
 
   async hset(key: string, value: AnyObject): Promise<void> {
-    await this.redis().hset(key, value)
+    const redis = await this.redis()
+    await redis.hset(key, value)
   }
 
   async hdel(key: string, fields: string[]): Promise<void> {
-    await this.redis().hdel(key, ...fields)
+    const redis = await this.redis()
+    await redis.hdel(key, ...fields)
   }
 
   async hmget(key: string, fields: string[]): Promise<NullableString[]> {
-    return await this.redis().hmget(key, ...fields)
+    const redis = await this.redis()
+    return await redis.hmget(key, ...fields)
   }
 
   async hmgetBuffer(key: string, fields: string[]): Promise<NullableBuffer[]> {
-    return await this.redis().hmgetBuffer(key, ...fields)
+    const redis = await this.redis()
+    return await redis.hmgetBuffer(key, ...fields)
   }
 
   async hincr(key: string, field: string, increment = 1): Promise<number> {
-    return await this.redis().hincrby(key, field, increment)
+    const redis = await this.redis()
+    return await redis.hincrby(key, field, increment)
   }
 
   async hincrBatch(key: string, incrementTuples: [string, number][]): Promise<[string, number][]> {
@@ -181,7 +198,8 @@ export class RedisClient implements CommonClient {
     value: string | number | Buffer,
     expireAt: UnixTimestamp,
   ): Promise<void> {
-    await this.redis().set(key, value, 'EXAT', expireAt)
+    const redis = await this.redis()
+    await redis.set(key, value, 'EXAT', expireAt)
   }
 
   async hsetWithTTL(_key: string, _value: AnyObject, _expireAt: UnixTimestamp): Promise<void> {
@@ -191,20 +209,23 @@ export class RedisClient implements CommonClient {
     // const keyList = valueKeys.join(' ')
     // const commandString = `HEXPIREAT ${key} ${expireAt} FIELDS ${numberOfKeys} ${keyList}`
     // const [command, ...args] = commandString.split(' ')
-    // await this.redis().hset(key, value)
-    // await this.redis().call(command!, args)
+    // await redis.hset(key, value)
+    // await redis.call(command!, args)
   }
 
   async mset(obj: Record<string, string | number>): Promise<void> {
-    await this.redis().mset(obj)
+    const redis = await this.redis()
+    await redis.mset(obj)
   }
 
   async msetBuffer(obj: Record<string, Buffer>): Promise<void> {
-    await this.redis().mset(obj)
+    const redis = await this.redis()
+    await redis.mset(obj)
   }
 
   async incr(key: string, by = 1): Promise<number> {
-    return await this.redis().incrby(key, by)
+    const redis = await this.redis()
+    return await redis.incrby(key, by)
   }
 
   async incrBatch(incrementTuples: [string, number][]): Promise<[string, number][]> {
@@ -227,7 +248,8 @@ export class RedisClient implements CommonClient {
   }
 
   async ttl(key: string): Promise<number> {
-    return await this.redis().ttl(key)
+    const redis = await this.redis()
+    return await redis.ttl(key)
   }
 
   async dropTable(table: string): Promise<void> {
@@ -266,7 +288,10 @@ export class RedisClient implements CommonClient {
    Returns BATCHES of keys in each iteration (as-is).
    */
   scanStream(opt?: ScanStreamOptions): ReadableTyped<string[]> {
-    return this.redis().scanStream(opt)
+    return createReadableFromAsync(async () => {
+      const redis = await this.redis()
+      return redis.scanStream(opt)
+    })
   }
 
   /**
@@ -274,14 +299,15 @@ export class RedisClient implements CommonClient {
    */
   scanStreamFlat(opt: ScanStreamOptions): ReadableTyped<string> {
     // biome-ignore lint/correctness/noFlatMapIdentity: ok
-    return (this.redis().scanStream(opt) as ReadableTyped<string[]>).flatMap(keys => keys)
+    return this.scanStream(opt).flatMap(keys => keys)
   }
 
   async scanCount(opt: ScanStreamOptions): Promise<number> {
+    const redis = await this.redis()
     // todo: implement more efficiently, e.g via LUA?
     let count = 0
 
-    await (this.redis().scanStream(opt) as ReadableTyped<string[]>).forEach(keys => {
+    await (redis.scanStream(opt) as ReadableTyped<string[]>).forEach(keys => {
       count += keys.length
     })
 
@@ -289,13 +315,17 @@ export class RedisClient implements CommonClient {
   }
 
   hscanStream(key: string, opt?: ScanStreamOptions): ReadableTyped<string[]> {
-    return this.redis().hscanStream(key, opt)
+    return createReadableFromAsync(async () => {
+      const redis = await this.redis()
+      return redis.hscanStream(key, opt)
+    })
   }
 
   async hscanCount(key: string, opt?: ScanStreamOptions): Promise<number> {
     let count = 0
 
-    const stream = this.redis().hscanStream(key, opt)
+    const redis = await this.redis()
+    const stream = redis.hscanStream(key, opt)
 
     await stream.forEach((keyValueList: string[]) => {
       count += keyValueList.length / 2
@@ -305,7 +335,8 @@ export class RedisClient implements CommonClient {
   }
 
   async withPipeline(fn: (pipeline: ChainableCommander) => Promisable<void>): Promise<void> {
-    const pipeline = this.redis().pipeline()
+    const redis = await this.redis()
+    const pipeline = redis.pipeline()
     await fn(pipeline)
     await pipeline.exec()
   }
@@ -313,4 +344,24 @@ export class RedisClient implements CommonClient {
   private log(...args: any[]): void {
     this.cfg.logger.log(...args)
   }
+}
+
+/**
+ * Turn async function into Readable.
+ */
+function createReadableFromAsync<T>(fn: AsyncFunction<ReadableTyped<T>>): ReadableTyped<T> {
+  const transform = new Transform({
+    objectMode: true,
+    transform: (chunk, _encoding, cb) => {
+      cb(null, chunk)
+    },
+  })
+
+  void fn()
+    .then(readable => {
+      readable.on('error', err => transform.emit('error', err)).pipe(transform)
+    })
+    .catch(err => transform.emit('error', err))
+
+  return transform
 }
