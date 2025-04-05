@@ -1,13 +1,13 @@
-import {
+import type {
   CommonDBCreateOptions,
   CommonKeyValueDB,
-  commonKeyValueDBFullSupport,
   CommonKeyValueDBSaveBatchOptions,
   IncrementTuple,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
-import { ReadableTyped } from '@naturalcycles/nodejs-lib'
-import { RedisKeyValueDBCfg } from './redisKeyValueDB'
+import { commonKeyValueDBFullSupport } from '@naturalcycles/db-lib'
+import type { ReadableTyped } from '@naturalcycles/nodejs-lib'
+import type { RedisKeyValueDBCfg } from './redisKeyValueDB.js'
 
 /**
  * RedisHashKeyValueDB is a KeyValueDB implementation that uses hash fields to simulate tables.

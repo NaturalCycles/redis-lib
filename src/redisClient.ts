@@ -1,5 +1,4 @@
-import {
-  _stringMapEntries,
+import type {
   AnyObject,
   CommonLogger,
   NullableBuffer,
@@ -8,11 +7,12 @@ import {
   StringMap,
   UnixTimestamp,
 } from '@naturalcycles/js-lib'
-import { ReadableTyped } from '@naturalcycles/nodejs-lib'
+import { _stringMapEntries } from '@naturalcycles/js-lib'
+import type { ReadableTyped } from '@naturalcycles/nodejs-lib'
 import type { Redis, RedisOptions } from 'ioredis'
 import type * as RedisLib from 'ioredis'
-import type { ScanStreamOptions } from 'ioredis/built/types'
-import type { ChainableCommander } from 'ioredis/built/utils/RedisCommander'
+import type { ScanStreamOptions } from 'ioredis/built/types.js'
+import type { ChainableCommander } from 'ioredis/built/utils/RedisCommander.js'
 
 export interface CommonClient extends AsyncDisposable {
   connected: boolean

@@ -1,5 +1,7 @@
-import { localTime, UnixTimestamp } from '@naturalcycles/js-lib'
-import { RedisClient } from './redisClient'
+import type { UnixTimestamp } from '@naturalcycles/js-lib'
+import { localTime } from '@naturalcycles/js-lib'
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest'
+import { RedisClient } from './redisClient.js'
 
 let client: RedisClient
 

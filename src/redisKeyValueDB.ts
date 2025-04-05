@@ -1,14 +1,14 @@
-import {
+import type {
   CommonDBCreateOptions,
   CommonKeyValueDB,
-  commonKeyValueDBFullSupport,
   CommonKeyValueDBSaveBatchOptions,
   IncrementTuple,
   KeyValueDBTuple,
 } from '@naturalcycles/db-lib'
+import { commonKeyValueDBFullSupport } from '@naturalcycles/db-lib'
 import { _isTruthy, _zip } from '@naturalcycles/js-lib'
-import { ReadableTyped } from '@naturalcycles/nodejs-lib'
-import { RedisClient } from './redisClient'
+import type { ReadableTyped } from '@naturalcycles/nodejs-lib'
+import type { RedisClient } from './redisClient.js'
 
 export interface RedisKeyValueDBCfg {
   client: RedisClient

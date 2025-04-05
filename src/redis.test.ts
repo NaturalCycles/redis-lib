@@ -1,7 +1,8 @@
-import { TEST_TABLE } from '@naturalcycles/db-lib/dist/testing'
+import { TEST_TABLE } from '@naturalcycles/db-lib/dist/testing/index.js'
 import { pDelay } from '@naturalcycles/js-lib'
-import { RedisClient } from './redisClient'
-import { RedisKeyValueDB } from './redisKeyValueDB'
+import { expect, test } from 'vitest'
+import { RedisClient } from './redisClient.js'
+import { RedisKeyValueDB } from './redisKeyValueDB.js'
 
 test('redis lazy initialization should not throw', async () => {
   await using _redis = new RedisClient({
